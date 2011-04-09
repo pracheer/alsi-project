@@ -18,6 +18,7 @@ import ssm.messages.GeneralMsg;
 
 
 /**
+ * This class is responsible for gener
  * @author prac, @bby
  *
  */
