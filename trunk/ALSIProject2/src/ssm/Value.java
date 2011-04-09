@@ -45,6 +45,11 @@ public class Value {
 	
 	public static Value fromString(String string) {
 		String[] strings = string.split(SEPARATOR);
-		return new Value(Integer.parseInt(strings[0]), strings[1]);
+		if(strings.length==0)
+			return new Value(1, DEFAULT_MSG);
+		else if(strings.length == 1)
+			return new Value(Integer.parseInt(strings[0]), "");
+		else
+			return new Value(Integer.parseInt(strings[0]), strings[1]);
 	}
 }

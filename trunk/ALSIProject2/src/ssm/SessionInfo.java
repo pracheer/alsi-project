@@ -2,6 +2,7 @@ package ssm;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Date;
 
 /**
  * Contains Session Information.
@@ -72,5 +73,10 @@ public class SessionInfo {
 	}
 	public Value getValue() {
 		return value;
+	}
+
+	public String getTimeOut() {
+		Date date = new Date(timestamp);
+		return date.toLocaleString();
 	}
 }

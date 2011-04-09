@@ -9,4 +9,10 @@ public class Constants {
 	public static int R = 1;
 	public static int roundTime = 1000;
 	public static final long SESSION_VALIDITY = 60*1000; // 1 minute
+	
+	public static String toHTMLString() {
+		return "WQ="+WQ + "<br/>W=" + W + "<br/>TIMEOUT=" + TIMEOUT + "<br/>roundTime"+roundTime
+		 + "<br/>SESSION_VALIDITY"+SESSION_VALIDITY+" ms.";
+	}
+
 }
