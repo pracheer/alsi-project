@@ -144,7 +144,7 @@ public class SSM extends HttpServlet {
 			Members wMembers;
 			// write to W members.
 			synchronized (members) {
-				Constants.W = (int) Math.min(Math.ceil(members.size()/2.0), members.size());
+				Constants.W = (int) Math.ceil(members.size()/2.0);
 				Constants.WQ = (int) Math.max(Constants.W - 1, 1);
 				Members newMembers = new Members();
 				for (Member m : members.getMembers()) {

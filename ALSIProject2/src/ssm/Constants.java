@@ -11,9 +11,9 @@ public class Constants {
 	public static final long SESSION_VALIDITY = 60*1000; // 1 minute
 	
 	public static String toHTMLString() {
-		return "WQ="+WQ + "<br/>W=" + W + 
-		"<br/>TIMEOUT=" + TIMEOUT + 
-		" ms.<br/>roundTime="+roundTime+" ms." +
+		return "WQ="+WQ + " servers.<br/>W=" + W + " servers." + 
+		"<br/>TIMEOUT=" + TIMEOUT + " ms." +  
+		"<br/>roundTime="+roundTime+" ms." +
 		"<br/>SESSION_VALIDITY="+SESSION_VALIDITY+" ms.";
 	}
 
