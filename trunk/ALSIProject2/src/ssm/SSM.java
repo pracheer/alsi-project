@@ -111,12 +111,11 @@ public class SSM extends HttpServlet {
 						Value value = ssmStub.get(sessionId, version, locationMembers);
 						version++;
 
-						if(value == null)
+						if(value == null) {
 							value = new Value(1);
-						else
+						}
+						else {
 							value.setCount(value.getCount()+1);
-
-						if(request.getParameter("replace")!=null) {
 							String message = request.getParameter("message");
 							value.setMsg(message);
 						}
@@ -145,10 +144,16 @@ public class SSM extends HttpServlet {
 			Members wMembers;
 			// write to W members.
 			synchronized (members) {
-				Constants.W = Math.min(1, members.size()+1);
-				Constants.WQ = Constants.W;
+				Constants.W = (int) Math.ceil(members.size()/2)+1;
+				Constants.WQ = (int) Math.floor(members.size()/2)+1;
+				Members newMembers = new Members();
+				for (Member m : members.getMembers()) {
+					if(m.isEqualTo(me))
+						continue;
+					newMembers.add(m);
+				}
 				System.err.println("Changed Constants.W to "+ Constants.W + " and Constants.WQ to " + Constants.WQ);
-				wMembers = ssmStub.put(sessionInfo.getSessionId(), sessionInfo.getVersion(), members, 
+				wMembers = ssmStub.put(sessionInfo.getSessionId(), sessionInfo.getVersion(), newMembers, 
 						Constants.W-1, Constants.WQ-1, value);
 			}
 			wMembers.add(me);
