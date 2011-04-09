@@ -116,8 +116,10 @@ public class SSM extends HttpServlet {
 						}
 						else {
 							value.setCount(value.getCount()+1);
-							String message = request.getParameter("message");
-							value.setMsg(message);
+							if(request.getParameter("replace")!= null) {
+								String message = request.getParameter("message");
+								value.setMsg(message);
+							}
 						}
 
 						sessionInfo = new SessionInfo(sessionId, version, value);
@@ -129,7 +131,7 @@ public class SSM extends HttpServlet {
 				count = 1;
 				sessionInfo = SessionInfo.create(new Value(count));
 			}
-			
+
 			SessionInfo oldSession = sessionMap.get(sessionInfo.getSessionId());
 			if(oldSession!=null) {
 				synchronized (oldSession) {
@@ -144,8 +146,14 @@ public class SSM extends HttpServlet {
 			Members wMembers;
 			// write to W members.
 			synchronized (members) {
-				Constants.W = (int) Math.ceil(members.size()/2.0);
-				Constants.WQ = (int) Math.max(Constants.W - 1, 1);
+				if(members.size()<=2) {
+					Constants.W = 1/*(int) Math.ceil(members.size()/2.0)*/;
+					Constants.WQ = 1/*(int) Math.max(Constants.W - 1, 1)*/;
+				}
+				else {
+					Constants.W = 2/*(int) Math.ceil(members.size()/2.0)*/;
+					Constants.WQ = 2/*(int) Math.max(Constants.W - 1, 1)*/;
+				}
 				Members newMembers = new Members();
 				for (Member m : members.getMembers()) {
 					if(m.isEqualTo(me))
@@ -158,8 +166,8 @@ public class SSM extends HttpServlet {
 			}
 			wMembers.add(me);
 			String cookieVal = URLEncoder.encode(sessionInfo.getSessionId()
-			+ SEPARATOR + sessionInfo.getVersion()
-			+ SEPARATOR + wMembers.toString());
+					+ SEPARATOR + sessionInfo.getVersion()
+					+ SEPARATOR + wMembers.toString());
 
 			if(cookieVal.length() > 1024) {
 				out.write(handleError("Cookie size exceeded."));
@@ -168,9 +176,9 @@ public class SSM extends HttpServlet {
 			Cookie newCookie = new Cookie(COOKIE_NAME, cookieVal); 
 			response.addCookie(newCookie);
 			String msg = "(" + value.getCount() + ")" + " " + value.getMsg()
-					+ ". This request processed by " + me.getIp() + ":"
-					+ me.getPort() + "<br/>" +  "Session would expire at:" + sessionInfo.getTimeOut() + " GMT."
-					+ "<br/>" + Constants.toHTMLString();
+			+ ". This request processed by " + me.getIp() + ":"
+			+ me.getPort() + "<br/>" +  "Session would expire at:" + sessionInfo.getTimeOut() + " GMT."
+			+ "<br/>" + Constants.toHTMLString();
 			out.write(assign3HTML(msg));
 			return;
 		}
