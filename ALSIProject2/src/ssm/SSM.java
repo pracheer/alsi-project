@@ -2,6 +2,8 @@ package ssm;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
@@ -22,7 +24,7 @@ import javax.servlet.http.HttpServletResponse;
 public class SSM extends HttpServlet {
 	private static final String SEPARATOR = "_";
 
-	private static final String COOKIE_NAME = "CS5300SESSION";
+	private static final String COOKIE_NAME = "CS5300SESSION1";
 
 	private static final long serialVersionUID = 1L;
 
@@ -84,7 +86,7 @@ public class SSM extends HttpServlet {
 				// repeated access.
 				for (Cookie cookie : cookies) {
 					if(cookie.getName().equals(COOKIE_NAME)) {
-						String val = cookie.getValue();
+						String val = URLDecoder.decode(cookie.getValue());
 						String[] split = val.split(SEPARATOR);
 						if(split.length != 3) {
 							out.write(handleError("Cookie not constructed properly"));
@@ -150,9 +152,9 @@ public class SSM extends HttpServlet {
 						Constants.W-1, Constants.WQ-1, value);
 			}
 			wMembers.add(me);
-			String cookieVal = sessionInfo.getSessionId()
+			String cookieVal = URLEncoder.encode(sessionInfo.getSessionId()
 			+ SEPARATOR + sessionInfo.getVersion()
-			+ SEPARATOR + wMembers.toString();
+			+ SEPARATOR + wMembers.toString());
 
 			if(cookieVal.length() > 1024) {
 				out.write(handleError("Cookie size exceeded."));
@@ -162,7 +164,8 @@ public class SSM extends HttpServlet {
 			response.addCookie(newCookie);
 			String msg = "(" + value.getCount() + ")" + " " + value.getMsg()
 					+ ". This request processed by " + me.getIp() + ":"
-					+ me.getPort();
+					+ me.getPort() + "<br/>" +  "Session would expire at:" + sessionInfo.getTimeOut() + " GMT."
+					+ "<br/>" + Constants.toHTMLString();
 			out.write(assign3HTML(msg));
 			return;
 		}
