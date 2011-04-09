@@ -154,6 +154,7 @@ public class SSM extends HttpServlet {
 					Constants.W = 2/*(int) Math.ceil(members.size()/2.0)*/;
 					Constants.WQ = 2/*(int) Math.max(Constants.W - 1, 1)*/;
 				}
+				
 				Members newMembers = new Members();
 				for (Member m : members.getMembers()) {
 					if(m.isEqualTo(me))
@@ -178,7 +179,7 @@ public class SSM extends HttpServlet {
 			String msg = "(" + value.getCount() + ")" + " " + value.getMsg()
 			+ ". This request processed by " + me.getIp() + ":"
 			+ me.getPort() + "<br/>" +  "Session would expire at:" + sessionInfo.getTimeOut() + " GMT."
-			+ "<br/>" + Constants.toHTMLString();
+			+ "<br/>" + Constants.toHTMLString() + "<br/>Membercount:"+members.size();
 			out.write(assign3HTML(msg));
 			return;
 		}
