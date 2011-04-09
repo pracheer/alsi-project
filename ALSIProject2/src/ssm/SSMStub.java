@@ -18,7 +18,9 @@ import ssm.messages.GeneralMsg;
 
 
 /**
- * This class is responsible for gener
+ * Implementation of the stub. 
+ * It sends the UDP packet to W members, and waits for WQ replies.
+ * 
  * @author prac, @bby
  *
  */

@@ -13,6 +13,14 @@ import java.util.HashMap;
 import ssm.messages.Message;
 import ssm.messages.GeneralMsg;
 
+/**
+ * Implementation of the databses, shared with the TomCat server. 
+ * It is responsible for implementing the group membership protocol, which is based on the opration PING.
+ * The Communication with the AS is done through the operations GET, PUT, and REMOVE.
+ * 
+ * @author prac
+ *
+ */
 public class BrickServer implements Runnable {
 
 	DatagramSocket rpcSocket;
@@ -139,6 +147,7 @@ public class BrickServer implements Runnable {
 					synchronized(sessionInfo) {
 						sessionMap.remove(putMsg.getSessionId());
 					}
+					return operation;
 				}
 				else {
 					operation.setErrorMsg("Session not found");
@@ -154,6 +163,8 @@ public class BrickServer implements Runnable {
 	private byte[] computeResponse(byte[] data) {
 		Operation operation = Operation.fromString(new String(data));
 		Operation operationOut = computeResponseOperation(operation);
+		if(operationOut == null)
+			System.err.println("empty operationoutString for received packet:"+new String(data));
 		return operationOut.toString().getBytes();
 	}
 }

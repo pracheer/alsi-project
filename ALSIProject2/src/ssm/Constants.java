@@ -4,7 +4,7 @@ public class Constants {
 	public static int WQ = 2;
 	public static int W = 2;
 	public static final int DATAGRAM_SIZE = 1000;
-	public static final int TIMEOUT = 40000; // in milliseconds
+	public static final int TIMEOUT = 240000; // in milliseconds
 	
 	public static int R = 1;
 	public static int roundTime = 1000;
