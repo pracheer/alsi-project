@@ -14,6 +14,7 @@
 		<display-name>SSM</display-name>
 		<servlet-name>SSM</servlet-name>
 		<servlet-class>ssm.SSM</servlet-class>
+		<load-on-startup>1</load-on-startup>
 	</servlet>
 
 	<servlet-mapping>
