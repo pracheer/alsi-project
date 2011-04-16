@@ -52,6 +52,8 @@ public class GMClient implements Runnable {
 				Members dbMembers = instance.getMembers();
 				boolean found = false;
 				boolean timeout = false;
+				boolean updated = false;
+				
 				if(dbMembers.size()!=0) {
 					found = dbMembers.search(me);
 					int rand = randomGenerator.nextInt(dbMembers.size());
@@ -74,7 +76,6 @@ public class GMClient implements Runnable {
 						
 						System.out.println("Received reply to ping");
 
-
 					} catch (SocketTimeoutException e) {
 						timeout = true;
 					} catch (IOException e) {
@@ -84,17 +85,21 @@ public class GMClient implements Runnable {
 					if (timeout) {
 						System.out.println("timeout occurred. Removing "+testMember+" from simpleDB");
 						dbMembers.remove(testMember);
+						updated = true;
 						instance.removeMember(testMember.getIp(), testMember.getPort());
 					}
 					
-					members.updateList(dbMembers);
 				}
 				
 				if (!found) {
 					System.out.println("Adding myself ("+me+") to simpleDB");
 					instance.addMember(me.getIp(), me.getPort());
+					dbMembers.add(me);
+					updated = true;
 				}
 				
+				members.updateList(dbMembers);
+
 				int sleepTime = Constants.roundTime/2 + randomGenerator.nextInt(Constants.roundTime);
 				try {
 					Thread.sleep(sleepTime);
