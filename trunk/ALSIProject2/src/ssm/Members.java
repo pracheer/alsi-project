@@ -7,7 +7,7 @@ public class Members {
 
 	Vector<Member> members;
 
-	private static final String LOCATION_SEPARATOR = ";";
+	private static final String LOCATION_SEPARATOR = "_";
 
 	public Members() {
 		members = new Vector<Member>();

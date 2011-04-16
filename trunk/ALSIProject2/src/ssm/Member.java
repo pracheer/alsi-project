@@ -30,4 +30,8 @@ public class Member {
 		return (m.getIp().equals(ip) &&
 				(m.getPort()==port));
 	}
+	
+	public String toString() {
+		return ip +":" + port;
+	}
 }

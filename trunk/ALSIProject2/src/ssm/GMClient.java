@@ -41,6 +41,7 @@ public class GMClient implements Runnable {
 
 		try {
 			while (true) {
+				System.out.println("GMClient invoked");
 				int callId = randomGenerator.nextInt();
 				Random randomGenerator = new Random();
 				DatagramSocket rpcSocket = null;

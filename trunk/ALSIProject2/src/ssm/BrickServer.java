@@ -64,7 +64,12 @@ public class BrickServer implements Runnable {
 				
 				rpcSocket.receive(recvPkt);
 				
-				byte[] outBuf = computeResponse(recvPkt.getData());
+				String str = new String(recvPkt.getData());
+				System.out.println(getIP()+":"+getPort()+":: recvd "+ str+" from "+recvPkt.getAddress()+":"+recvPkt.getPort());
+				String outStr = computeResponse(str);
+				System.out.println(getIP()+":"+getPort()+":: sending "+ outStr+" to "+recvPkt.getAddress()+":"+recvPkt.getPort());
+				
+				 byte[] outBuf = outStr.getBytes();
 				DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length,
 						recvPkt.getAddress(), recvPkt.getPort());
 				
@@ -160,11 +165,13 @@ public class BrickServer implements Runnable {
 		return null;
 
 	}
-	private byte[] computeResponse(byte[] data) {
-		Operation operation = Operation.fromString(new String(data));
+	private String computeResponse(String str) {
+		Operation operation = Operation.fromString(str);
 		Operation operationOut = computeResponseOperation(operation);
 		if(operationOut == null)
-			System.err.println("empty operationoutString for received packet:"+new String(data));
-		return operationOut.toString().getBytes();
+			System.err.println("empty operationout. String for received packet:" + str);
+		String outStr = operationOut.toString();
+		System.out.println();
+		return outStr;
 	}
 }
