@@ -157,7 +157,7 @@ public class SSM extends HttpServlet {
 					Constants.WQ = 2(int) Math.max(Constants.W - 1, 1);
 				}
 */				
-				if(members.size() < Constants.WQ || members.size() < Constants.W) {
+				if(members.size() < Constants.WQ) {
 					out.write(handleError("Not enough servers running to service the request"));
 					return;
 				}
