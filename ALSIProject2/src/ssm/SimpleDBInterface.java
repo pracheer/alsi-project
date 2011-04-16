@@ -69,7 +69,7 @@ public class SimpleDBInterface {
 	public Members getMembers()
 	{ 
 		String selectExpression = "select * from `" + domainName + "`";
-        System.out.println("Selecting: " + selectExpression + "\n");
+        //System.out.println("Selecting: " + selectExpression + "\n");
         SelectRequest selectRequest = new SelectRequest(selectExpression);
         List<Item> items = sdb.select(selectRequest).getItems();
         Members members = new Members();
@@ -92,7 +92,7 @@ public class SimpleDBInterface {
 	public void displayMembers()
 	{ 
 		String selectExpression = "select * from `" + domainName + "`";
-        System.out.println("Selecting: " + selectExpression + "\n");
+        //System.out.println("Selecting: " + selectExpression + "\n");
         SelectRequest selectRequest = new SelectRequest(selectExpression);
         List<Item> items = sdb.select(selectRequest).getItems();
         for (Item item : items) {
@@ -108,25 +108,27 @@ public class SimpleDBInterface {
 	
 	public boolean addMember(String ip, int port)
 	{
+		System.out.println(".\n.\n.Adding "+ ip+ " "+ port);
 		serial++;
 		List<ReplaceableItem> sampleData = new ArrayList<ReplaceableItem>();
 		boolean added = false;
         if(getMember(ip, port)==null)
         {
-        	sampleData.add(new ReplaceableItem(ITEM + serial).withAttributes(
+        	sampleData.add(new ReplaceableItem(ITEM + ip + "_" + port).withAttributes(
                     new ReplaceableAttribute(NAME, ip, false),
                     new ReplaceableAttribute(PORT, port+"", false)));
 
     		sdb.batchPutAttributes(new BatchPutAttributesRequest(domainName, sampleData));
     		added = true;
         }
+        displayMembers();
         return added;
 	}
 	
 	public void cleanAll()
 	{
 		String selectExpression = "select * from `" + domainName + "`";
-        System.out.println("Selecting: " + selectExpression + "\n");
+        //System.out.println("Selecting: " + selectExpression + "\n");
         SelectRequest selectRequest = new SelectRequest(selectExpression);
         List<Item> items = sdb.select(selectRequest).getItems();
         for (Item item : items) {
@@ -160,7 +162,7 @@ public class SimpleDBInterface {
 		boolean removed = false;
         if( item !=null)
         {
-        	 System.out.println("Deleting item" + item.getName());
+        	 //System.out.println("Deleting item" + item.getName());
         	 sdb.deleteAttributes(new DeleteAttributesRequest(domainName, item.getName()));
         	 
         	 removed = true;
