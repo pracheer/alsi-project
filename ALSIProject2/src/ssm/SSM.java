@@ -157,6 +157,11 @@ public class SSM extends HttpServlet {
 					Constants.WQ = 2(int) Math.max(Constants.W - 1, 1);
 				}
 */				
+				if(members.size() < Constants.WQ || members.size() < Constants.W) {
+					out.write(handleError("Not enough servers running to service the request"));
+					return;
+				}
+				
 				Members newMembers = new Members();
 				for (Member m : members.getMembers()) {
 					if(m.isEqualTo(me))
@@ -179,11 +184,11 @@ public class SSM extends HttpServlet {
 			Cookie newCookie = new Cookie(COOKIE_NAME,URLEncoder.encode(cookieVal)); 
 			newCookie.setMaxAge(60*60);// 1hour.
 			response.addCookie(newCookie);
-			String msg = "(" + value.getCount() + ")" + " " + value.getMsg()
-			+ ". This request processed by " + me.getIp() + ":"
+			String msg = "(" + value.getCount() + ")" + " " + value.getMsg() + ".";
+			String smallMsg = "This request processed by " + me.getIp() + ":"
 			+ me.getPort() + "<br/>" +  "Session would expire at:" + sessionInfo.getTimeOut() + " GMT."
 			+ "<br/>" + Constants.toHTMLString() + "<br/>Membercount:"+Math.max(members.size(),1);
-			out.write(assign3HTML(msg));
+			out.write(assign3HTML(msg, smallMsg));
 			return;
 		}
 		finally {
@@ -210,6 +215,10 @@ public class SSM extends HttpServlet {
 	}
 
 
+	private String getSmallHTMLStr(String smallMsg) {
+		return "<h3>" + smallMsg + "</h3>";
+	}
+
 	private String handleError(String str) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("An Error has occurred");
@@ -218,7 +227,7 @@ public class SSM extends HttpServlet {
 		return createHTML(buf.toString());
 	}
 
-	private String assign3HTML(String str) {
+	private String assign3HTML(String str, String smallStr) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("<h1>");
 		buf.append("<br/><br/>");
@@ -233,6 +242,9 @@ public class SSM extends HttpServlet {
 		buf.append("<input name=\"logout\" type=\"submit\" value=\"Logout\">");
 		buf.append("</form>");
 		buf.append("</h1>");
+		
+		buf.append(getSmallHTMLStr(smallStr));
+		
 		return createHTML(buf.toString());
 	}
 
