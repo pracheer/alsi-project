@@ -187,7 +187,7 @@ public class SSM extends HttpServlet {
 			String msg = "(" + value.getCount() + ")" + " " + value.getMsg() + ".";
 			String smallMsg = "This request processed by " + me.getIp() + ":"
 			+ me.getPort() + "<br/>" +  "Session would expire at:" + sessionInfo.getTimeOut() + " GMT."
-			+ "<br/>" + Constants.toHTMLString() + "<br/>Membercount:"+Math.max(members.size(),1);
+			+ "<br/>" + "<br/>" + "<br/>" + Constants.toHTMLString() + "<br/>Membercount:"+Math.max(members.size(),1);
 			out.write(assign3HTML(msg, smallMsg));
 			return;
 		}
