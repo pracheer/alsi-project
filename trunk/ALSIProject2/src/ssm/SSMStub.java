@@ -34,7 +34,7 @@ public class SSMStub {
 		randomGenerator = new Random();
 	}
 
-	Value get(String sessionId, int version, Members members) {
+	Value get(Member me, String sessionId, int version, Members members) {
 		int callId = randomGenerator.nextInt();
 
 		try {
@@ -47,32 +47,37 @@ public class SSMStub {
 				InetAddress address = InetAddress.getByName(member.getIp());
 				DatagramPacket sendPkt = new DatagramPacket(outBuf, 
 						Math.min(outBuf.length, Constants.DATAGRAM_SIZE), address, member.getPort());
-				System.out.println("Sending packet with "+callId+" to " + member);
+				System.out.println(me + "::Sending packet with "+callId+" and msg:"+operation.toString()+" to " + member);
 				rpcSocket.send(sendPkt);
 			}
 
 			boolean replied = false;
+			boolean timeout = false;
 			byte [] inBuf = new byte[Constants.DATAGRAM_SIZE];
 			Operation operationIn = null;
 			DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
+			
 			do {
 				try {
 					replied = false;
+					timeout = false;
 					recvPkt.setLength(inBuf.length);
 					rpcSocket.setSoTimeout(Constants.TIMEOUT);
 					rpcSocket.receive(recvPkt);
-					operationIn = Operation.fromString(new String(recvPkt.getData()));
-					
+					String recvStr = new String(recvPkt.getData());
+					System.out.println("" + recvStr);
+					operationIn = Operation.fromString(recvStr);
 					if(!operation.isError() && operationIn.getCallId() == callId) {
 						String ip = recvPkt.getAddress().getHostAddress();
 						Member member = new Member(ip, recvPkt.getPort());
-						System.out.println("Received Correct Answer with "+callId+" from " + member);
+						System.out.println(me+"::Received Correct Answer with "+callId+" and "+recvStr+" from " + member);
 						replied = true;
 					}
 
 				} catch(SocketTimeoutException e) {
 					System.err.println("Not enough servers are up and running. Need at least 1 " +
 							" servers to reply \n but no one has replied in last " + Constants.TIMEOUT +".\nSo exiting.");
+					timeout = true;
 					break;
 				} catch(InterruptedIOException iioe) {
 					recvPkt = null;
@@ -80,7 +85,7 @@ public class SSMStub {
 				} catch(IOException ioe) {
 					ioe.printStackTrace();
 				}
-			} while( !replied || operationIn.getCallId() != callId || operationIn.isError());
+			} while( !timeout && (!replied || operationIn.getCallId() != callId || operationIn.isError()));
 
 			if(operationIn!=null && operationIn.getCallId() == callId && !operationIn.isError()) {
 				GeneralMsg msg = (GeneralMsg)operationIn.getMessage();
@@ -108,7 +113,7 @@ public class SSMStub {
 	 * @param sessionInfo 
 	 * @return replied: W members who have replied.
 	 */
-	public Members put(String sessionId, int version, Members members,
+	public Members put(Member me, String sessionId, int version, Members members,
 			int W, int WQ, Value value) {
 		if(W == 0)
 			return new Members();
@@ -139,40 +144,45 @@ public class SSMStub {
 				Member member = members.get(i);
 				InetAddress address = InetAddress.getByName(member.getIp());
 				DatagramPacket sendPkt = new DatagramPacket(outBuf, outBuf.length, address, member.getPort());
-				System.out.println("Sending packet with "+callId+" to " + member);
+				System.out.println(me+"::Sending packet with "+callId+" and msg "+operation.toString()+" to " + member);
 				rpcSocket.send(sendPkt);
 			}
 
+			boolean timeout = false;
 			Members replied = new Members();
 			byte [] inBuf = new byte[Constants.DATAGRAM_SIZE];
 			Operation operationIn = null;
 			DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
 			do {
 				try {
+					timeout = false;
 					recvPkt.setLength(inBuf.length);
 					rpcSocket.setSoTimeout(Constants.TIMEOUT);
 					rpcSocket.receive(recvPkt);
 					
-					operationIn = Operation.fromString(new String(recvPkt.getData()));
+					String recvStr = new String(recvPkt.getData());
+					operationIn = Operation.fromString(recvStr);
 
 					if(!operation.isError() && operationIn.getCallId() == callId) {
 						String ip = recvPkt.getAddress().getHostAddress();
 						Member member = new Member(ip, recvPkt.getPort());
-						System.out.println("Received Correct Answer with "+callId+" from " + member);
+						System.out.println(me+"::Received Correct Answer with "+callId+" and msg:"+recvStr+" from " + member);
 						replied.add(member);
 					}
 				} catch(SocketTimeoutException e) {
 					System.err.println("Not enough servers are up and running. Need at least " + WQ + 
 							" servers to reply \n but no one has replied in last " + Constants.TIMEOUT +".\nSo exiting.");
+					timeout = true;
 				} catch(InterruptedIOException iioe) {
 					recvPkt = null;
 					iioe.printStackTrace();
 				} catch(IOException ioe) {
 					ioe.printStackTrace();
 				}
-			} while(replied.size() < WQ);
+			} while(!timeout && replied.size() < WQ);
 
-			System.err.println(WQ + " servers have replied to call:"+callId);
+			if(!timeout)
+				System.err.println(WQ + " servers have replied to call:"+callId);
 			
 			return replied;
 
@@ -202,18 +212,23 @@ public class SSMStub {
 			}
 
 			boolean replied = false;
+			boolean timeout = false;
 			byte [] inBuf = new byte[Constants.DATAGRAM_SIZE];
 			Operation operationIn = null;
 			DatagramPacket recvPkt = new DatagramPacket(inBuf, inBuf.length);
 			do {
 				try {
 					replied = false;
+					timeout = false;
 					recvPkt.setLength(inBuf.length);
 					rpcSocket.setSoTimeout(Constants.TIMEOUT);
 					rpcSocket.receive(recvPkt);
-					operationIn = Operation.fromString(new String(recvPkt.getData()));
+					String recvStr = new String(recvPkt.getData());
+					operationIn = Operation.fromString(recvStr);
 					replied = true;
 				} catch(SocketTimeoutException e) {
+					System.err.println("Timeout occurred. So exiting.");
+					timeout = true;
 					break;
 				} catch(InterruptedIOException iioe) {
 					recvPkt = null;
@@ -221,7 +236,7 @@ public class SSMStub {
 				} catch(IOException ioe) {
 					ioe.printStackTrace();
 				}
-			} while( !replied || operationIn.getCallId() != callId || operation.isError());
+			} while( !timeout && (!replied || operationIn.getCallId() != callId || operation.isError()));
 
 		} catch (SocketException e) {
 			e.printStackTrace();
@@ -229,5 +244,4 @@ public class SSMStub {
 			e.printStackTrace();
 		}			
 	}
-
 }
