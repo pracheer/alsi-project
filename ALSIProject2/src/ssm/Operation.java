@@ -20,6 +20,7 @@ public class Operation {
 	Message message;
 	
 	private static final String OP_SEP = "_";
+	private static final String LENGTH_SEP = "#";
 
 	public Operation(int callId, OpCode opCode, Message message) {
 		this.opCode = opCode;
@@ -70,6 +71,9 @@ public class Operation {
 	 */
 	public static Operation fromString(String opString) {
 		
+		String[] split = opString.split(LENGTH_SEP);
+		int length = Integer.parseInt(split[0]);
+		opString = split[1].substring(0, length);
 		String[] strings = opString.split(OP_SEP);
 		
 		int callId = Integer.parseInt(strings[0]);
@@ -102,6 +106,7 @@ public class Operation {
 	}
 	
 	public String toString() {
-		return callId + OP_SEP + opCode + OP_SEP + error + OP_SEP + errorMsg + OP_SEP + message;
+		String str = callId + OP_SEP + opCode + OP_SEP + error + OP_SEP + errorMsg + OP_SEP + message;
+		return str.length()+LENGTH_SEP+str;
 	}
 }
