@@ -62,6 +62,7 @@ public class SSM extends HttpServlet {
 		GMClient gmClient = new GMClient(members, me);
 		Thread gmThread = new Thread(gmClient);
 		gmThread.start();
+		System.out.println(me + " starting.");
 //		SimpleDBInterface.getInstance().cleanAll();
 	}
 
@@ -147,15 +148,15 @@ public class SSM extends HttpServlet {
 			Members wMembers;
 			// write to W members.
 			synchronized (members) {
-				if(members.size()<=2) {
-					Constants.W = 1/*(int) Math.ceil(members.size()/2.0)*/;
-					Constants.WQ = 1/*(int) Math.max(Constants.W - 1, 1)*/;
+/*				if(members.size()<=2) {
+					Constants.W = 1(int) Math.ceil(members.size()/2.0);
+					Constants.WQ = 1(int) Math.max(Constants.W - 1, 1);
 				}
 				else {
-					Constants.W = 2/*(int) Math.ceil(members.size()/2.0)*/;
-					Constants.WQ = 2/*(int) Math.max(Constants.W - 1, 1)*/;
+					Constants.W = 2(int) Math.ceil(members.size()/2.0);
+					Constants.WQ = 2(int) Math.max(Constants.W - 1, 1);
 				}
-				
+*/				
 				Members newMembers = new Members();
 				for (Member m : members.getMembers()) {
 					if(m.isEqualTo(me))
