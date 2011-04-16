@@ -2,7 +2,7 @@ package ssm;
 
 public class Constants {
 	public static int WQ = 3;
-	public static int W = 3;
+	public static int W = 5;
 	public static final int DATAGRAM_SIZE = 1000;
 	public static final int TIMEOUT = 9000; // in milliseconds
 	
