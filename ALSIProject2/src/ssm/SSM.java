@@ -24,8 +24,8 @@ import javax.servlet.http.HttpServletResponse;
 public class SSM extends HttpServlet {
 	private static final String SEPARATOR = "_";
 
-	private static final String COOKIE_NAME = "CS5300SESSION1";
-
+	private static final String COOKIE_NAME = "CS5300SESSION11";
+	
 	private static final long serialVersionUID = 1L;
 
 	public static final String title = "Session Management";
@@ -62,6 +62,7 @@ public class SSM extends HttpServlet {
 		GMClient gmClient = new GMClient(members, me);
 		Thread gmThread = new Thread(gmClient);
 		gmThread.start();
+//		SimpleDBInterface.getInstance().cleanAll();
 	}
 
 	/**
@@ -87,8 +88,8 @@ public class SSM extends HttpServlet {
 				for (Cookie cookie : cookies) {
 					if(cookie.getName().equals(COOKIE_NAME)) {
 						String val = URLDecoder.decode(cookie.getValue());
-						String[] split = val.split(SEPARATOR);
-						if(split.length != 3) {
+						String[] split = val.split(SEPARATOR, 3);
+						if(split.length < 3) {
 							out.write(handleError("Cookie not constructed properly"));
 							return;
 						}
@@ -108,7 +109,7 @@ public class SSM extends HttpServlet {
 						}
 
 						// TODO: check in local cache if data present.
-						Value value = ssmStub.get(sessionId, version, locationMembers);
+						Value value = ssmStub.get(me, sessionId, version, locationMembers);
 						version++;
 
 						if(value == null) {
@@ -131,7 +132,7 @@ public class SSM extends HttpServlet {
 				count = 1;
 				sessionInfo = SessionInfo.create(new Value(count));
 			}
-
+			
 			SessionInfo oldSession = sessionMap.get(sessionInfo.getSessionId());
 			if(oldSession!=null) {
 				synchronized (oldSession) {
@@ -162,7 +163,7 @@ public class SSM extends HttpServlet {
 					newMembers.add(m);
 				}
 				System.err.println("Changed Constants.W to "+ Constants.W + " and Constants.WQ to " + Constants.WQ);
-				wMembers = ssmStub.put(sessionInfo.getSessionId(), sessionInfo.getVersion(), newMembers, 
+				wMembers = ssmStub.put(me, sessionInfo.getSessionId(), sessionInfo.getVersion(), newMembers, 
 						Constants.W-1, Constants.WQ-1, value);
 			}
 			wMembers.add(me);
@@ -174,12 +175,13 @@ public class SSM extends HttpServlet {
 				out.write(handleError("Cookie size exceeded."));
 				return;
 			}
-			Cookie newCookie = new Cookie(COOKIE_NAME, cookieVal); 
+			Cookie newCookie = new Cookie(COOKIE_NAME,URLEncoder.encode(cookieVal)); 
+			newCookie.setMaxAge(60*60);// 1hour.
 			response.addCookie(newCookie);
 			String msg = "(" + value.getCount() + ")" + " " + value.getMsg()
 			+ ". This request processed by " + me.getIp() + ":"
 			+ me.getPort() + "<br/>" +  "Session would expire at:" + sessionInfo.getTimeOut() + " GMT."
-			+ "<br/>" + Constants.toHTMLString() + "<br/>Membercount:"+members.size();
+			+ "<br/>" + Constants.toHTMLString() + "<br/>Membercount:"+Math.max(members.size(),1);
 			out.write(assign3HTML(msg));
 			return;
 		}
