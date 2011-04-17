@@ -16,20 +16,41 @@ import com.amazonaws.services.simpledb.model.BatchPutAttributesRequest;
 import com.amazonaws.services.simpledb.model.CreateDomainRequest;
 import com.amazonaws.services.simpledb.model.DeleteAttributesRequest;
 import com.amazonaws.services.simpledb.model.Item;
+import com.amazonaws.services.simpledb.model.PutAttributesRequest;
 import com.amazonaws.services.simpledb.model.ReplaceableAttribute;
 import com.amazonaws.services.simpledb.model.ReplaceableItem;
 import com.amazonaws.services.simpledb.model.SelectRequest;
 
+class DataStorage{
+	int w, wq, r;
+	public int GetNumberOfServersToSendWriteRequest(){return w;}
+	public void SetNumberOfServersToSendWriteRequest(int w){this.w = w;}
+	public int GetNumberOfServersToWaitAfterWriteRequest(){return wq;}
+	public void SetNumberOfServersToWaitAfterWriteRequest(int wq){this.wq = wq;}
+	public int GetNumberOfServersToSendReadRequest(){return r;}
+	public void SetNumberOfServersToSendReadRequest(int r){this.r = r;}
+}
+
 
 public class SimpleDBInterface {
 	
-	private static final String ITEM = "Item_";
-	private static final String PORT = "Port";
-	private static final String NAME = "Hostname";
+	private static final String 
+	ITEM = "Item_",
+	PORT = "Port",
+	NAME = "Hostname",
+	WRITE_REQ = "NoOfServersToSendWriteRequest",
+	WRITE_RSP = "NoOfServersToWaitForWriteResponse",
+	READ_REQ = "NoOfServersToSendReadRequest";
+	
 	AmazonSimpleDB sdb;
 	static SimpleDBInterface instance = new SimpleDBInterface();
-	String domainName = "CS5300Proj1AbhiHimBB";
-	int serial = 0;
+	String domainName = "CS5300Proj1ServerNames";
+	String dataStorageDomainName = "CS5300Proj1StoragePlaces";
+	private static final String 
+	defaultWritesRequestsSend = "3", 
+	defaultWritesAcknowledgementsNeeded = "2", 
+	defaultReadRequests="2";
+	//int serial = 0;
 	
 	SimpleDBInterface()
 	{
@@ -39,19 +60,75 @@ public class SimpleDBInterface {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		boolean domainExists = false;
+		boolean domainExists = false, dataStorageDomainExists = false;
 		for (String domainNameE : sdb.listDomains().getDomainNames()) {
             if(domainNameE.equals(domainName))
-            {
             	domainExists = true;
+            if(domainNameE.equals(dataStorageDomainName))
+            	dataStorageDomainExists = true;
+            if(domainExists && dataStorageDomainExists)
             	break;
-            }
         }
 		if(!domainExists)
 		{
 			System.out.println("Creating domain called " + domainName + ".\n");
 			sdb.createDomain(new CreateDomainRequest(domainName));
 		}
+		if(!dataStorageDomainExists)
+		{
+			System.out.println("Creating domain called " + dataStorageDomainName + ".\n");
+			sdb.createDomain(new CreateDomainRequest(dataStorageDomainName));
+		}
+		String selectExpression = "select * from `" + dataStorageDomainName + "`";
+        //System.out.println("Selecting: " + selectExpression + "\n");
+        SelectRequest selectRequest = new SelectRequest(selectExpression);
+        List<Item> items = sdb.select(selectRequest).getItems();
+        if(items.size() == 0)
+        {
+        	List<ReplaceableItem> sampleData = new ArrayList<ReplaceableItem>();
+			sampleData.add(
+					new ReplaceableItem(ITEM).withAttributes(
+	                    new ReplaceableAttribute(WRITE_REQ, defaultWritesRequestsSend, true),
+	                    new ReplaceableAttribute(WRITE_RSP, defaultWritesAcknowledgementsNeeded, true),
+	                    new ReplaceableAttribute(READ_REQ, defaultReadRequests, true)
+	                    ));
+
+    		sdb.batchPutAttributes(new BatchPutAttributesRequest(dataStorageDomainName, sampleData));
+        }
+	}
+	
+	public DataStorage getDataStoragePattern()
+	{
+		String selectExpression = "select * from `" + dataStorageDomainName + "`";
+        //System.out.println("Selecting: " + selectExpression + "\n");
+        SelectRequest selectRequest = new SelectRequest(selectExpression);
+        List<Item> items = sdb.select(selectRequest).getItems();
+        DataStorage ds = new DataStorage();
+        if(items.size()>1)
+        	System.err.println("Some Big error");
+        for (Attribute attribute : items.get(0).getAttributes()) {
+        	String name = attribute.getName();
+            if(name.equals(WRITE_REQ)) 
+            	ds.SetNumberOfServersToSendWriteRequest(Integer.parseInt(attribute.getValue()));
+            else
+            {
+            	if(name.equals(WRITE_RSP)) 
+                	ds.SetNumberOfServersToWaitAfterWriteRequest(Integer.parseInt(attribute.getValue()));
+            	else
+            		if(name.equals(READ_REQ))
+            			ds.SetNumberOfServersToSendReadRequest(Integer.parseInt(attribute.getValue()));
+            }
+        }
+        return ds;
+	}
+	
+	public void updatetaStoragePattern(DataStorage ds)
+	{
+		List<ReplaceableAttribute> replaceableAttributes = new ArrayList<ReplaceableAttribute>();
+        replaceableAttributes.add(new ReplaceableAttribute(WRITE_REQ, ds.GetNumberOfServersToSendWriteRequest()+"", true));
+        replaceableAttributes.add(new ReplaceableAttribute(WRITE_RSP, ds.GetNumberOfServersToWaitAfterWriteRequest()+"", true));
+        replaceableAttributes.add(new ReplaceableAttribute(READ_REQ, ds.GetNumberOfServersToSendReadRequest()+"", true));
+        sdb.putAttributes(new PutAttributesRequest(dataStorageDomainName, ITEM, replaceableAttributes));
 	}
 	
 	public Item getMember(String ip, int port)
@@ -109,7 +186,7 @@ public class SimpleDBInterface {
 	public boolean addMember(String ip, int port)
 	{
 		System.out.println(".\n.\n.Adding "+ ip+ " "+ port);
-		serial++;
+		//serial++;
 		List<ReplaceableItem> sampleData = new ArrayList<ReplaceableItem>();
 		boolean added = false;
         if(getMember(ip, port)==null)
@@ -157,7 +234,7 @@ public class SimpleDBInterface {
 */
 	public boolean removeMember(String ip, int port)
 	{
-		serial++;
+		//serial++;
 		Item item = getMember(ip, port);
 		boolean removed = false;
         if( item !=null)
