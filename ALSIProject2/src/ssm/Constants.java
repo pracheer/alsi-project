@@ -12,9 +12,9 @@ public class Constants {
 	
 	public static String toHTMLString() {
 		return "WQ="+WQ + " servers.<br/>W=" + W + " servers." + 
-		"<br/>TIMEOUT=" + TIMEOUT + " ms." +  
-		"<br/>roundTime="+roundTime+" ms." +
-		"<br/>SESSION_VALIDITY="+SESSION_VALIDITY+" ms.";
+		"<br/>TIMEOUT=" + TIMEOUT/1000.0 + " seconds." +  
+		"<br/>gossip time interval(roundTime)="+roundTime/1000.0+" seconds" +
+		"<br/>SESSION_VALIDITY="+SESSION_VALIDITY/1000.0+" seconds.";
 	}
 
 }
