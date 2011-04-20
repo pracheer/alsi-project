@@ -148,15 +148,6 @@ public class SSM extends HttpServlet {
 			Members wMembers;
 			// write to W members.
 			synchronized (members) {
-				/*				if(members.size()<=2) {
-					Constants.W = 1(int) Math.ceil(members.size()/2.0);
-					Constants.WQ = 1(int) Math.max(Constants.W - 1, 1);
-				}
-				else {
-					Constants.W = 2(int) Math.ceil(members.size()/2.0);
-					Constants.WQ = 2(int) Math.max(Constants.W - 1, 1);
-				}
-				 */				
 				DataStorage ds = SimpleDBInterface.getInstance().getDataStoragePattern();
 				Constants.W = ds.GetNumberOfServersToSendWriteRequest();
 				Constants.WQ = ds.GetNumberOfServersToWaitAfterWriteRequest();
@@ -172,7 +163,7 @@ public class SSM extends HttpServlet {
 						continue;
 					newMembers.add(m);
 				}
-				System.err.println("Changed Constants.W to "+ Constants.W + " and Constants.WQ to " + Constants.WQ);
+//				System.err.println("Changed Constants.W to "+ Constants.W + " and Constants.WQ to " + Constants.WQ);
 				wMembers = ssmStub.put(me, sessionInfo.getSessionId(), sessionInfo.getVersion(), newMembers, 
 						Constants.W-1, Constants.WQ-1, value);
 			}
@@ -197,7 +188,7 @@ public class SSM extends HttpServlet {
 
 			String[] otherMsgs = {smallMsg};
 
-			out.write(assign3HTML(msg, members.toString(), otherMsgs));
+			out.write(assign3HTML(msg, members.toHTMLString(), otherMsgs));
 			return;
 		}
 		finally {
