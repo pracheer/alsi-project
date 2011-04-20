@@ -158,9 +158,9 @@ public class SSM extends HttpServlet {
 				}
 				 */				
 				DataStorage ds = SimpleDBInterface.getInstance().getDataStoragePattern();
-				//				Constants.W = ds.GetNumberOfServersToSendWriteRequest();
-				//				Constants.WQ = ds.GetNumberOfServersToWaitAfterWriteRequest();
-				//				Constants.R = ds.GetNumberOfServersToSendReadRequest();
+				Constants.W = ds.GetNumberOfServersToSendWriteRequest();
+				Constants.WQ = ds.GetNumberOfServersToWaitAfterWriteRequest();
+				Constants.R = ds.GetNumberOfServersToSendReadRequest();
 				if(members.size() < Constants.WQ) {
 					out.write(handleError("Not enough servers running to service the request"));
 					return;
