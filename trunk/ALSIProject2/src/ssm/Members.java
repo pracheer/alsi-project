@@ -93,6 +93,16 @@ public class Members {
 		}
 		return buffer.toString();
 	}
+	
+	public String toHTMLString() {
+		StringBuffer buffer = new StringBuffer();
+		for (int m = 0; m < size(); m++) {
+			Member member = members.get(m);
+			buffer.append(member.getIp()+ ":" + member.getPort());
+			buffer.append("<br/>");
+		}
+		return buffer.toString();
+	}
 
 	public boolean search(Member mem) {
 		for (Member member : members) {
