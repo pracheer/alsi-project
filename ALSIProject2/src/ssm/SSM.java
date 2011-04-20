@@ -25,7 +25,7 @@ public class SSM extends HttpServlet {
 	private static final String SEPARATOR = "_";
 
 	private static final String COOKIE_NAME = "CS5300SESSION11";
-	
+
 	private static final long serialVersionUID = 1L;
 
 	public static final String title = "Session Management";
@@ -63,7 +63,7 @@ public class SSM extends HttpServlet {
 		Thread gmThread = new Thread(gmClient);
 		gmThread.start();
 		System.out.println(me + " starting.");
-//		SimpleDBInterface.getInstance().cleanAll();
+		//		SimpleDBInterface.getInstance().cleanAll();
 	}
 
 	/**
@@ -133,7 +133,7 @@ public class SSM extends HttpServlet {
 				count = 1;
 				sessionInfo = SessionInfo.create(new Value(count));
 			}
-			
+
 			SessionInfo oldSession = sessionMap.get(sessionInfo.getSessionId());
 			if(oldSession!=null) {
 				synchronized (oldSession) {
@@ -148,7 +148,7 @@ public class SSM extends HttpServlet {
 			Members wMembers;
 			// write to W members.
 			synchronized (members) {
-/*				if(members.size()<=2) {
+				/*				if(members.size()<=2) {
 					Constants.W = 1(int) Math.ceil(members.size()/2.0);
 					Constants.WQ = 1(int) Math.max(Constants.W - 1, 1);
 				}
@@ -156,16 +156,16 @@ public class SSM extends HttpServlet {
 					Constants.W = 2(int) Math.ceil(members.size()/2.0);
 					Constants.WQ = 2(int) Math.max(Constants.W - 1, 1);
 				}
-*/				
+				 */				
 				DataStorage ds = SimpleDBInterface.getInstance().getDataStoragePattern();
-				Constants.W = ds.GetNumberOfServersToSendWriteRequest();
-				Constants.WQ = ds.GetNumberOfServersToWaitAfterWriteRequest();
-				Constants.R = ds.GetNumberOfServersToSendReadRequest();
+				//				Constants.W = ds.GetNumberOfServersToSendWriteRequest();
+				//				Constants.WQ = ds.GetNumberOfServersToWaitAfterWriteRequest();
+				//				Constants.R = ds.GetNumberOfServersToSendReadRequest();
 				if(members.size() < Constants.WQ) {
 					out.write(handleError("Not enough servers running to service the request"));
 					return;
 				}
-				
+
 				Members newMembers = new Members();
 				for (Member m : members.getMembers()) {
 					if(m.isEqualTo(me))
@@ -192,7 +192,12 @@ public class SSM extends HttpServlet {
 			String smallMsg = "This request processed by " + me.getIp() + ":"
 			+ me.getPort() + "<br/>" +  "Session would expire at:" + sessionInfo.getTimeOut() + " GMT."
 			+ "<br/>" + "<br/>" + "<br/>" + Constants.toHTMLString() + "<br/>Membercount:"+Math.max(members.size(),1);
-			out.write(assign3HTML(msg, smallMsg));
+
+			smallMsg = getSmallHTMLStr(smallMsg);
+
+			String[] otherMsgs = {smallMsg};
+
+			out.write(assign3HTML(msg, members.toString(), otherMsgs));
 			return;
 		}
 		finally {
@@ -231,7 +236,7 @@ public class SSM extends HttpServlet {
 		return createHTML(buf.toString());
 	}
 
-	private String assign3HTML(String str, String smallStr) {
+	private String assign3HTML(String str, String hiddenMsg, String otherStrings[]) {
 		StringBuffer buf = new StringBuffer();
 		buf.append("<h1>");
 		buf.append("<br/><br/>");
@@ -245,10 +250,27 @@ public class SSM extends HttpServlet {
 		buf.append("<br/><br/>");
 		buf.append("<input name=\"logout\" type=\"submit\" value=\"Logout\">");
 		buf.append("</form>");
+
 		buf.append("</h1>");
-		
-		buf.append(getSmallHTMLStr(smallStr));
-		
+
+
+		for (String string : otherStrings) {
+			buf.append(string);
+		}
+
+		buf.append("<input type=\"button\"  id=\"button1\" " +
+				"onclick=\"document.getElementById('info').style.display='block'\" " +
+				"value=\"Show more\"/><br/>");
+
+		buf.append("<input type=\"button\"  id=\"button2\" " +
+				"onclick=\"document.getElementById('info').style.display = 'none'\" " +
+				"value=\"Show less\"/><br/>");
+
+		buf.append("<div id=\"info\" style=\"display:none\">" +
+				hiddenMsg + 
+		"</div>");
+
+
 		return createHTML(buf.toString());
 	}
 
@@ -256,7 +278,8 @@ public class SSM extends HttpServlet {
 		String docType = "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.0 " +
 		"Transitional//EN\">\n";
 		return docType + "<HTML>\n" +
-		"<HEAD><TITLE>" + title + "</TITLE></HEAD>\n" +
+		"<HEAD><TITLE>" + title + "</TITLE>" +
+		"</HEAD>\n" +
 		"<BODY>\n" +
 		str + 
 		"</BODY></HTML>";
