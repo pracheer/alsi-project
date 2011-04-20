@@ -162,7 +162,7 @@ public class SSM extends HttpServlet {
 				Constants.WQ = ds.GetNumberOfServersToWaitAfterWriteRequest();
 				Constants.R = ds.GetNumberOfServersToSendReadRequest();
 				if(members.size() < Constants.WQ) {
-					out.write(handleError("Not enough servers running to service the request"));
+					out.write(handleError("Not enough servers running to service the request<br/>WQ="+Constants.WQ));
 					return;
 				}
 
